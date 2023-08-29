@@ -79,7 +79,6 @@ namespace BookStoreApp.API.Data
 
             var hasher = new PasswordHasher<ApplicationUser>();
 
-
             modelBuilder.Entity<ApplicationUser>().HasData(
                 new ApplicationUser
                 {
