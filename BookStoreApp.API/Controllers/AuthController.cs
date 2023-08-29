@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using BookStoreApp.API.Data;
+using BookStoreApp.API.Helpers;
 using BookStoreApp.API.Models.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,17 +15,22 @@ namespace BookStoreApp.API.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _configuration;
+        private JwtTokenHelper _jwtTokenHelper;
 
-        public AuthController(ILogger<AuthController> logger, IMapper mapper, UserManager<ApplicationUser> userManager)
+        public AuthController(ILogger<AuthController> logger, IMapper mapper, UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             _logger = logger;
             _mapper = mapper;
             _userManager = userManager;
+            _configuration = configuration;
+            _jwtTokenHelper = new JwtTokenHelper(configuration);
         }
 
         [HttpPost]
         [Route("register")]
-        public async Task<ActionResult> Register([FromBody] ApplicationUserDto userDto)
+        [Authorize(Roles = "Administrator")]
+        public async Task<ActionResult<ApplicationUserDetailsDto>> Register([FromBody] ApplicationUserDto userDto)
         {
             try
             {
@@ -82,7 +89,7 @@ namespace BookStoreApp.API.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginDto loginDto)
+        public async Task<ActionResult<UserLoginRespone>> Login([FromBody] UserLoginDto loginDto)
         {
             try
             {
@@ -91,7 +98,7 @@ namespace BookStoreApp.API.Controllers
                 if (user == null)
                 {
                     _logger.LogError("User cannot be found in the database!", loginDto);
-                    return BadRequest();
+                    return Unauthorized(loginDto);
                 }
 
                 var passValid = await _userManager.CheckPasswordAsync(user, loginDto.PasswordHash);
@@ -99,15 +106,18 @@ namespace BookStoreApp.API.Controllers
                 if (passValid == false)
                 {
                     _logger.LogError("User cannot be found in the database!", loginDto);
-                    return BadRequest();
+                    return Unauthorized(loginDto);
                 }
 
                 var usr = _mapper.Map<ApplicationUserDetailsDto>(user);
+                var roles = await _userManager.GetRolesAsync(user);
+                usr.Role = roles.FirstOrDefault() ?? "INVALID";
 
-                var role = await _userManager.GetRolesAsync(user);
-                usr.Role = role.FirstOrDefault() ?? "INVALID";
+                var userClaims = await _userManager.GetClaimsAsync(user);
 
-                return Ok(usr);
+                var token = _jwtTokenHelper.GenerateWebToken(user, roles, userClaims);
+
+                return Ok(new UserLoginRespone { UserDetails = usr, Token = token });
             }
             catch (Exception ex)
             {

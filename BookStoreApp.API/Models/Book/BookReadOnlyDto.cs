@@ -2,6 +2,6 @@
 {
     public class BookReadOnlyDto : BookDetailsDto
     {
-        public string AuthorName { get; set; } = "";
+        public string AuthorName { get; set; } = string.Empty;
     }
 }

@@ -6,10 +6,10 @@ namespace BookStoreApp.API.Models.User
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = "";
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [StringLength(20, MinimumLength = 5)]
-        public string PasswordHash { get; set; } = "";
+        public string PasswordHash { get; set; } = string.Empty;
     }
 }
