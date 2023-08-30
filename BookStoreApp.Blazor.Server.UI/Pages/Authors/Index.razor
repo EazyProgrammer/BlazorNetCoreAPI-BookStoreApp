@@ -1,0 +1,68 @@
+﻿@page "/authors/"
+@inject IAuthorService authorService
+
+<h3>Authors</h3>
+<hr />
+
+@if (response.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to get data.
+        </h4>
+    </div>
+}
+
+@if (Model == null)
+{
+    <div class="alert alert-info">
+        <h4>
+            Please wait, loading..
+        </h4>
+    </div>
+}
+else
+{
+    <a class="btn btn-primary" href="/authors/create"><span class="oi oi-plus" aria-hidden="true"></span> Create</a>
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var auth in Model)
+            {
+                <tr>
+                    <td>@auth.FirstName</td>
+                    <td>@auth.LastName</td>
+                    <td>
+                        <a class="btn btn-info" href="/authors/create"><span class="oi oi-book" aria-hidden="true"></span> Details</a>
+                        <a class="btn btn-danger" href="/authors/create"><span class="oi oi-trash" aria-hidden="true"></span> Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<AuthorReadOnlyDto> Model;
+    private Response<List<AuthorReadOnlyDto>> response = new Response<List<AuthorReadOnlyDto>> { Success = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await authorService.GetAuthorListAsync();
+
+        if (response.Success)
+        {
+            Model = response.Data;
+        }
+        else
+        {
+            Model = new List<AuthorReadOnlyDto>();
+        }
+    }
+}

@@ -87,6 +87,7 @@ namespace BookStoreApp.API.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Route("PostAuthor")]
         public async Task<ActionResult> PostAuthor(AuthorCreateDto author)
         {
             if (_context.Authors == null)
