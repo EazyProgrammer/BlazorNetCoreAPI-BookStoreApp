@@ -30,7 +30,7 @@ namespace BookStoreApp.API.Controllers
         [HttpPost]
         [Route("register")]
         [Authorize(Roles = "Administrator")]
-        public async Task<ActionResult<ApplicationUserDetailsDto>> Register([FromBody] ApplicationUserDto userDto)
+        public async Task<ActionResult<ApplicationUserDetailsDto>> Register(ApplicationUserDto userDto)
         {
             try
             {
@@ -89,7 +89,8 @@ namespace BookStoreApp.API.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<UserLoginRespone>> Login([FromBody] UserLoginDto loginDto)
+        [AllowAnonymous]
+        public async Task<ActionResult<UserLoginRespone>> Login(UserLoginDto loginDto)
         {
             try
             {
