@@ -1,12 +1,11 @@
-﻿@page "/authors/create"
+﻿@page "/authors/update/{id:int}"
 @inject IAuthorService authorService
 @inject NavigationManager navManager
 
-<h3>Create new author</h3>
-
+<h3>Update Author Details</h3>
 <hr />
 
-@if (response.Success == false)
+@if (responseGetAuthor.Success == false)
 {
     <div class="alert alert-info">
         <h4>
@@ -17,18 +16,29 @@
     <hr />
 }
 
+@if (responseUpdateAuthor.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to update author.
+        </h4>
+    </div>
+
+    <hr />
+}
+
 @if (Author == null)
 {
     <div class="alert alert-info">
         <h4>
-            Please wait, loading author details ..
+            Please wait, loading..
         </h4>
     </div>
 }
 else
 {
     <div class="card-body">
-        <EditForm Model="Author" OnValidSubmit="HandleCreateAuthor">
+        <EditForm Model="Author" OnValidSubmit="HandleUpdateAuthor">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
@@ -58,7 +68,7 @@ else
 
             <button type="submit" class="btn btn-primary btn-block">
                 <span class="oi oi-pencil"></span>
-                Create Author
+                Update Author
             </button>
 
             <button @onclick="BackToList" class="btn btn-secondary btn-block">
@@ -70,15 +80,28 @@ else
 }
 
 @code {
-    private AuthorCreateDto Author = new AuthorCreateDto();
-    private string Message = string.Empty;
-    private Response<int> response = new Response<int> { Success = true };
+    [Parameter]
+    public int id { get; set; }
 
-    private async Task HandleCreateAuthor()
+    private AuthorUpdateDto Author = new AuthorUpdateDto();
+    private Response<AuthorUpdateDto> responseGetAuthor = new Response<AuthorUpdateDto> { Success = true };
+    private Response<int> responseUpdateAuthor = new Response<int> { Success = true };
+
+    protected override async Task OnInitializedAsync()
     {
-        response = await authorService.CreateAuthor(Author);
+        responseGetAuthor = await authorService.GetAuthorForUpdateAsync(id);
 
-        if (response.Success)
+        if (responseGetAuthor.Success)
+        {
+            Author = responseGetAuthor.Data ?? new AuthorUpdateDto();
+        }
+    }
+
+    private async Task HandleUpdateAuthor()
+    {
+        responseUpdateAuthor = await authorService.EditAuthor(Author);
+
+        if (responseUpdateAuthor.Success)
         {
             BackToList();
         }

@@ -11,6 +11,8 @@
             Something went wrong trying to get data.
         </h4>
     </div>
+
+    <hr />
 }
 
 @if (Model == null)
@@ -33,13 +35,14 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var auth in Model)
+            @foreach (var author in Model)
             {
                 <tr>
-                    <td>@auth.FirstName</td>
-                    <td>@auth.LastName</td>
+                    <td>@author.FirstName</td>
+                    <td>@author.LastName</td>
                     <td>
-                        <a class="btn btn-info" href="/authors/create"><span class="oi oi-book" aria-hidden="true"></span> Details</a>
+                        <a class="btn btn-info" href="/authors/details/@author.Id"><span class="oi oi-book" aria-hidden="true"></span> Details</a>
+                        <a class="btn btn-warning" href="/authors/update/@author.Id"><span class="oi oi-pencil" aria-hidden="true"></span> Update</a>
                         <a class="btn btn-danger" href="/authors/create"><span class="oi oi-trash" aria-hidden="true"></span> Delete</a>
                     </td>
                 </tr>
