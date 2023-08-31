@@ -56,14 +56,14 @@ else
 
             <br />
 
-            <button type="submit" class="btn btn-primary btn-block">
-                <span class="oi oi-pencil"></span>
-                Create Author
+            <button @onclick="BackToList" class="btn btn-outline-primary btn-block">
+                <span class="oi oi-arrow-left"></span>
+                Back
             </button>
 
-            <button @onclick="BackToList" class="btn btn-secondary btn-block">
-                <span class="oi oi-media-skip-backward"></span>
-                Back
+            <button type="submit" class="btn btn-outline-secondary btn-block">
+                <span class="oi oi-check"></span>
+                Create Author
             </button>
         </EditForm>
     </div>
