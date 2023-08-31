@@ -1,0 +1,99 @@
+﻿@page "/authors/details/{id:int}"
+@inject IAuthorService authorService
+@inject NavigationManager navManager
+
+<h3>Author Details</h3>
+
+<hr />
+
+@if (response.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to get author details.
+        </h4>
+    </div>
+
+    <hr />
+}
+
+@if (Author == null)
+{
+    <div class="alert alert-info">
+        <h4>
+            Please wait, loading author details ..
+        </h4>
+    </div>
+}
+else
+{
+    <div class="card-body">
+        <EditForm Model="Author">
+            <fieldset disabled>
+                <div class="form-group">
+                    <label for="email">First Name</label>
+                    <InputText class="form-control" @bind-Value="Author.FirstName" id="FirstName" />
+                    <ValidationMessage For="@(() => Author.FirstName)" />
+                </div>
+
+                <br />
+
+                <div class="form-group">
+                    <label for="email">First Name</label>
+                    <InputText class="form-control" @bind-Value="Author.LastName" id="LastName" />
+                    <ValidationMessage For="@(() => Author.LastName)" />
+                </div>
+
+                <br />
+
+                <div class="form-group">
+                    <label for="email">First Name</label>
+                    <InputTextArea class="form-control" @bind-Value="Author.Bio" id="Bio" />
+                    <ValidationMessage For="@(() => Author.Bio)" />
+                </div>
+
+                <br />
+
+            </fieldset>
+
+            <button @onclick="BackToList" class="btn btn-secondary btn-block">
+                <span class="oi oi-arrow-left"></span>
+                Back To List
+            </button>
+
+            <button class="btn btn-primary btn-block" onclick="@EditAuthor">
+                <span class="oi oi-pencil"></span>
+                Edit Author
+            </button>
+
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private AuthorReadOnlyDto Author = new AuthorReadOnlyDto();
+    private Response<AuthorReadOnlyDto> response = new Response<AuthorReadOnlyDto> { Success = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await authorService.GetAuthorAsync(id);
+
+        if (response.Success)
+        {
+            Author = response.Data ?? new AuthorReadOnlyDto();
+        }
+    }
+
+    private void BackToList()
+    {
+        navManager.NavigateTo("/authors");
+    }
+
+    private void EditAuthor()
+    {
+        navManager.NavigateTo($"/authors/update/{id}");
+    }
+}
