@@ -18,14 +18,14 @@ namespace BookStoreApp.Blazor.Server.UI.Services
             _mapper = mapper;
         }
 
-        public async Task<Response<List<AuthorReadOnlyDto>>> GetAuthorListAsync()
+        public async Task<Response<List<AuthorReadOnlyDto>>> GetActiveAuthorListAsync()
         {
             Response<List<AuthorReadOnlyDto>>? response;
 
             try
             {
                 await GetBearerTojken();
-                var data = await _client.AuthorsAllAsync();
+                var data = await _client.GetAllActiveAuthorsAsync();
                 response = new Response<List<AuthorReadOnlyDto>>
                 {
                     Data = data.ToList(),
@@ -40,15 +40,15 @@ namespace BookStoreApp.Blazor.Server.UI.Services
             return response;
         }
 
-        public async Task<Response<AuthorReadOnlyDto>> GetAuthorAsync(int id)
+        public async Task<Response<AuthorBooksDto>> GetAuthorAsync(int id)
         {
-            Response<AuthorReadOnlyDto> response;
+            Response<AuthorBooksDto> response;
 
             try
             {
                 await GetBearerTojken();
                 var data = await _client.AuthorsGETAsync(id);
-                response = new Response<AuthorReadOnlyDto>
+                response = new Response<AuthorBooksDto>
                 {
                     Data = data,
                     Success = true
@@ -56,7 +56,7 @@ namespace BookStoreApp.Blazor.Server.UI.Services
             }
             catch (ApiException ex)
             {
-                response = ConvertApiExceptions<AuthorReadOnlyDto>(ex);
+                response = ConvertApiExceptions<AuthorBooksDto>(ex);
             }
 
             return response;
@@ -110,6 +110,23 @@ namespace BookStoreApp.Blazor.Server.UI.Services
             {
                 await GetBearerTojken();
                 await _client.AuthorsPUTAsync(author);
+            }
+            catch (ApiException ex)
+            {
+                response = ConvertApiExceptions<int>(ex);
+            }
+
+            return response;
+        }
+
+        public async Task<Response<int>> DeleteAuthor(int authorId)
+        {
+            Response<int> response = new Response<int>() { Success = true };
+
+            try
+            {
+                await GetBearerTojken();
+                await _client.AuthorsDELETEAsync(authorId);
             }
             catch (ApiException ex)
             {

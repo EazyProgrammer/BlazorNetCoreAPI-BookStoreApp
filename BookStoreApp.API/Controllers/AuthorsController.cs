@@ -25,35 +25,64 @@ namespace BookStoreApp.API.Controllers
 
         // GET: api/Authors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAuthors()
+        [Route("GetAllActiveAuthors")]
+        public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAllActiveAuthors()
         {
             if (_context.Authors == null)
             {
                 return NotFound();
             }
-            var auth = await _context.Authors.ToListAsync();
-            var authDto = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(auth);
-            return Ok(authDto);
+            var author = await _context.Authors
+                .Where(a => a.IsDeleted == false).ToListAsync();
+            var authorDto = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(author);
+            return Ok(authorDto);
+        }
+
+        // GET: api/Authors
+        [HttpGet]
+        [Route("GetAllInActiveAuthors")]
+        public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAllInActiveAuthors()
+        {
+            if (_context.Authors == null)
+            {
+                return NotFound();
+            }
+            var author = await _context.Authors
+                .Where(a => a.IsDeleted == true).ToListAsync();
+            var authorDto = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(author);
+            return Ok(authorDto);
         }
 
         // GET: api/Authors/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<AuthorReadOnlyDto>> GetAuthor(int id)
+        public async Task<ActionResult<AuthorBooksDto>> GetAuthor(int id)
         {
-            if (_context.Authors == null)
+            try
             {
+                if (_context.Authors == null)
+                {
+                    return NotFound();
+                }
+
+                var author = await _context.Authors
+                    .Include(b => b.Books)
+                    .Where(a => a.Id == id)
+                    .FirstOrDefaultAsync();
+
+                if (author == null)
+                {
+                    return NotFound();
+                }
+
+                var authorDto = _mapper.Map<AuthorBooksDto>(author);
+
+                return authorDto;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Something went wrong trying to get author details");
                 return NotFound();
             }
-            var author = await _context.Authors.FindAsync(id);
-
-            if (author == null)
-            {
-                return NotFound();
-            }
-
-            var authDto = _mapper.Map<AuthorReadOnlyDto>(author);
-
-            return authDto;
         }
 
         // PUT: api/Authors/5
@@ -118,7 +147,9 @@ namespace BookStoreApp.API.Controllers
                 return NotFound();
             }
 
-            _context.Authors.Remove(author);
+            author.IsDeleted = true;
+
+            _context.Entry(author).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();

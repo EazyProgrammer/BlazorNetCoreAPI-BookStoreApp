@@ -14,5 +14,7 @@ namespace BookStoreApp.API.Models.Author
 
         [StringLength(250)]
         public string Bio { get; set; } = string.Empty;
+
+        public bool IsDeleted { get; set; }
     }
 }

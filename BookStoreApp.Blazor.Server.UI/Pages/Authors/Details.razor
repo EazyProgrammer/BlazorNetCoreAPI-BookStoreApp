@@ -52,6 +52,38 @@ else
                     <ValidationMessage For="@(() => Author.Bio)" />
                 </div>
 
+                <hr>
+
+                @if (Author.Books != null)
+                {
+                    @foreach (var book in Author.Books)
+                    {
+                        <div class="card" style="width: 18rem;">
+                            <img src="@book.Image" class="card-img-top" alt="@book.Title">
+                            <div class="card-body">
+                                <h5 class="card-title">@book.Title</h5>
+                                <hr />
+                                <h7 class="card-title"><b>ISBN - @book.Isbn</b></h7>
+                                <br />
+                                <h7 class="card-title">Year - @book.Year</h7>
+                                <br />
+                                <h7 class="card-title"><b>R @book.Price</b></h7>
+                                <hr />
+                                <p class="card-text">@book.Summary</p>
+                                <hr />
+                                <a class="btn btn-outline-info" href="/authors/details/@book.Id"><span class="oi oi-book" aria-hidden="true"></span> </a>
+                                <a class="btn btn-outline-warning" href="/authors/update/@book.Id"><span class="oi oi-pencil" aria-hidden="true"></span></a>
+                                <a class="btn btn-outline-danger" href="/authors/create"><span class="oi oi-trash" aria-hidden="true"></span></a>
+                            </div>
+                        </div>
+
+                    }
+                }
+                else
+                {
+                    <h4>Author has no books.</h4>
+                }
+
                 <br />
 
             </fieldset>
@@ -74,8 +106,8 @@ else
     [Parameter]
     public int id { get; set; }
 
-    private AuthorReadOnlyDto Author = new AuthorReadOnlyDto();
-    private Response<AuthorReadOnlyDto> response = new Response<AuthorReadOnlyDto> { Success = true };
+    private AuthorBooksDto Author = new AuthorBooksDto();
+    private Response<AuthorBooksDto> response = new Response<AuthorBooksDto> { Success = true };
 
     protected override async Task OnInitializedAsync()
     {
@@ -83,7 +115,7 @@ else
 
         if (response.Success)
         {
-            Author = response.Data ?? new AuthorReadOnlyDto();
+            Author = response.Data ?? new AuthorBooksDto();
         }
     }
 

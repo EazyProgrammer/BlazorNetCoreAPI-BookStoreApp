@@ -4,10 +4,18 @@ namespace BookStoreApp.Blazor.Server.UI.Services
 {
     public interface IAuthorService
     {
-        Task<Response<List<AuthorReadOnlyDto>>> GetAuthorListAsync();
-        Task<Response<AuthorReadOnlyDto>> GetAuthorAsync(int id);
+        //get
+        Task<Response<List<AuthorReadOnlyDto>>> GetActiveAuthorListAsync();
+        Task<Response<AuthorBooksDto>> GetAuthorAsync(int id);
         Task<Response<AuthorUpdateDto>> GetAuthorForUpdateAsync(int id);
+
+        //create
         Task<Response<int>> CreateAuthor(AuthorCreateDto author);
+
+        //update
         Task<Response<int>> EditAuthor(AuthorUpdateDto author);
+
+        //delete
+        Task<Response<int>> DeleteAuthor(int authorId);
     }
 }
