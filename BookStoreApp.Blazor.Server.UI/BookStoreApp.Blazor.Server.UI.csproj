@@ -11,6 +11,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Pages\Authors\Details.razor.css" />
+	  <None Remove="Pages\Books\Index.razor.css" />
+	  <None Remove="Pages\Index.razor.css" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Pages\Authors\Details.razor.css" />
+	  <Content Include="Pages\Books\Index.razor.css" />
+	  <Content Include="Pages\Index.razor.css" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Include="BookStoreApp.NSwag.config" />
 	</ItemGroup>
 

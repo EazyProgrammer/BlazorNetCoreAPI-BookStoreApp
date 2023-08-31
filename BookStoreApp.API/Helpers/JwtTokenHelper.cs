@@ -35,7 +35,7 @@ namespace BookStoreApp.API.Helpers
                 issuer: _configuration["JwtSettings:Issuer"],
                 audience: _configuration["JwtSettings:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(Convert.ToInt32(_configuration["JwtSettings:Duration"])),
+                expires: DateTime.UtcNow.AddHours(Convert.ToInt32(_configuration["JwtSettings:Duration"])),
                 signingCredentials: credentials
                 );
 

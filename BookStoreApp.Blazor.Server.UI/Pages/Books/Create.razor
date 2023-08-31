@@ -1,0 +1,172 @@
+﻿@page "/books/create"
+@inject IAuthorService authorService
+@inject IBookService bookService
+@inject NavigationManager navManager
+@attribute [Authorize(Roles = Roles.Administrator)]
+
+<h3>Create Book</h3>
+
+<hr />
+
+@if (response.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to get data.
+        </h4>
+    </div>
+
+    <hr />
+}
+
+
+<div class="card-body">
+    <EditForm Model="Book">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="Title">Author</label>
+            <InputSelect class="form-control" @bind-Value="Book.AuthorId" id="AuthorId">
+                <option value=""> -- Select Author -- </option>
+                @foreach (var author in Authors)
+                {
+                    <option value="@author.Id">@author.FirstName @author.LastName</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Book.AuthorId)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="Title">Title</label>
+            <InputText class="form-control" @bind-Value="Book.Title" id="Title" />
+            <ValidationMessage For="@(() => Book.Title)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="Isbn">ISBN</label>
+            <InputText class="form-control" @bind-Value="Book.Isbn" id="Isbn" />
+            <ValidationMessage For="@(() => Book.Isbn)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="Year">Year</label>
+            <InputNumber class="form-control" @bind-Value="Book.Year" id="Year" />
+            <ValidationMessage For="@(() => Book.Year)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="Price">Price</label>
+            <InputNumber class="form-control" @bind-Value="Book.Price" id="Price" />
+            <ValidationMessage For="@(() => Book.Price)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="Summary">Summary</label>
+            <InputTextArea class="form-control" @bind-Value="Book.Summary" id="Summary" />
+            <ValidationMessage For="@(() => Book.Summary)" />
+        </div>
+
+        <hr />
+
+        <div class="form-group">
+            <label>Upload Image</label>
+            <hr />
+            <div>
+                <InputFile OnChange="HandleFileUpload" id="img" />
+                <br />
+                <br />
+                @if (!string.IsNullOrEmpty(img))
+                {
+                    <img src="@img" width="100" height="100" class="img-thumbnail" id="imgp" />
+                }
+                <br />
+                <p class="text-danger">@uploadingFileWarning</p>
+            </div>
+        </div>
+
+        <br />
+
+        <button @onclick="BackToList" class="btn btn-outline-primary btn-block">
+            <span class="oi oi-arrow-left"></span>
+            Back To List
+        </button>
+        |
+        <button type="submit" class="btn btn-outline-secondary btn-block" @onclick="HandleCreateBook">
+            <span class="oi oi-check"></span>
+            Create Book
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    private List<AuthorReadOnlyDto> Authors = new();
+    private BookCreateDto Book = new BookCreateDto();
+    private Response<int> response = new Response<int> { Success = true };
+
+    private string img = string.Empty;
+    private string Message = string.Empty;
+    private string uploadingFileWarning = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await authorService.GetActiveAuthorListAsync();
+
+        if (response.Success)
+        {
+            Authors = response.Data ?? new List<AuthorReadOnlyDto>();
+        }
+    }
+
+    private async Task HandleCreateBook()
+    {
+        response = await bookService.CreateBook(Book);
+
+        if (response.Success)
+        {
+            BackToList();
+        }
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            var ext = System.IO.Path.GetExtension(file.Name);
+
+            if (".jpg, .png, .jpeg".Contains(ext))
+            {
+                var byteArray = new byte[file.Size];
+                var fileContent = new StreamContent(file.OpenReadStream());
+                byteArray = await fileContent.ReadAsByteArrayAsync();
+                string imageType = file.ContentType;
+                string base64String = Convert.ToBase64String(byteArray);
+
+                Book.OriginalImageName = file.Name;
+                Book.ImageData = base64String;
+                img = $"data:{imageType}; base64, {base64String}";
+            }
+            else
+            {
+                uploadingFileWarning = "Please select valid image file (*.jpg | *.png | *.jpeg";
+            }
+        }
+    }
+
+    private void BackToList()
+    {
+        navManager.NavigateTo("/books");
+    }
+}

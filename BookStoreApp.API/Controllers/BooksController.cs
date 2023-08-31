@@ -15,12 +15,15 @@ namespace BookStoreApp.API.Controllers
         private readonly BookStoreDBContext _context;
         private readonly ILogger<BooksController> _logger;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public BooksController(BookStoreDBContext context, ILogger<BooksController> logger, IMapper mapper)
+        public BooksController(BookStoreDBContext context, ILogger<BooksController> logger, IMapper mapper,
+            IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: api/Books
@@ -40,11 +43,13 @@ namespace BookStoreApp.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<BookReadOnlyDto>> GetBook(int id)
         {
-          if (_context.Books == null)
-          {
-              return NotFound();
-          }
-            var book = await _context.Books.Include(b => b.Author).FirstOrDefaultAsync(b => b.Id == id);
+            if (_context.Books == null)
+            {
+                return NotFound();
+            }
+            var book = await _context.Books
+                .Include(b => b.Author)
+                .FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null)
             {
@@ -59,20 +64,46 @@ namespace BookStoreApp.API.Controllers
         // PUT: api/Books/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> PutBook([FromBody] BookUpdateDto book)
         {
-            var bk = _mapper.Map<Book>(book);
-            _context.Entry(bk).State = EntityState.Modified;
+            if (book.Id == 0)
+            {
+                return BadRequest();
+            }
 
             try
             {
+                var dbBook = _context.Books.Find(book.Id);
+
+                if (dbBook == null)
+                {
+                    return NotFound();
+                }
+
+                if (!string.IsNullOrEmpty(book.ImageData))
+                {
+                    var imageName = Path.GetFileName(dbBook.Image);
+                    var path = $"{_webHostEnvironment.WebRootPath}\\BookCoverImages\\{imageName}";
+
+                    if (System.IO.File.Exists(path))
+                    {
+                        System.IO.File.Delete(path);
+                    }
+
+                    book.Image = CreateFile(book.ImageData, book.OriginalImageName);
+                }
+
+                var bk = _mapper.Map(book, dbBook);
+
+                _context.Entry(bk).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BookExists(bk.Id))
+                if (!BookExists(book.Id))
                 {
-                    _logger.LogWarning("Book not found!", bk.Id);
+                    _logger.LogWarning("Book not found!", book.Id);
                     return NotFound();
                 }
                 else
@@ -81,6 +112,11 @@ namespace BookStoreApp.API.Controllers
                     return StatusCode(500, book);
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error occured trying to update Book!", ex);
+                return StatusCode(500, book);
+            }
 
             return NoContent();
         }
@@ -88,22 +124,34 @@ namespace BookStoreApp.API.Controllers
         // POST: api/Books
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> PostBook(BookCreateDto book)
         {
-          if (_context.Books == null)
-          {
-              return Problem("Entity set 'BookStoreDBContext.Books'  is null.");
-          }
+            try
+            {
+                if (_context.Books == null)
+                {
+                    return Problem("Entity set 'BookStoreDBContext.Books'  is null.");
+                }
 
-            var bk = _mapper.Map<Book>(book);
-            _context.Books.Add(bk);
-            await _context.SaveChangesAsync();
+                book.Image = CreateFile(book.ImageData, book.OriginalImageName);
 
-            return CreatedAtAction("GetBook", new { id = bk.Id }, book);
+                var bk = _mapper.Map<Book>(book);
+                _context.Books.Add(bk);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetBook", new { id = bk.Id }, book);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error occurred trying to create Book!", ex);
+                return StatusCode(500, book);
+            }
         }
 
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteBook(int id)
         {
             if (_context.Books == null)
@@ -126,5 +174,27 @@ namespace BookStoreApp.API.Controllers
         {
             return (_context.Books?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        private string CreateFile(string imageBase64, string imageName)
+        {
+            var url = HttpContext.Request.Host.Value;
+            var ext = Path.GetExtension(imageName);
+            var fileName = $"{Guid.NewGuid()}{ext}";
+
+            var path = $"{_webHostEnvironment.WebRootPath}\\BookCoverImages";
+            var filePath = $"{path}\\{fileName}";
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            byte[] image = Convert.FromBase64String(imageBase64);
+
+            var fileStream = System.IO.File.Create(filePath);
+            fileStream.Write(image, 0, image.Length);
+            fileStream.Close();
+
+            return $"https://{url}/BookCoverImages/{fileName}";
+        }
+
     }
 }

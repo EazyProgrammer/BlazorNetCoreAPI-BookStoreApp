@@ -86,8 +86,9 @@ namespace BookStoreApp.API.Controllers
         }
 
         // PUT: api/Authors/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // To protect from over posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> PutAuthor(AuthorUpdateDto author)
         {
             var auth = _mapper.Map<Author>(author);
@@ -114,9 +115,10 @@ namespace BookStoreApp.API.Controllers
         }
 
         // POST: api/Authors
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // To protect from over posting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Route("PostAuthor")]
+        [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> PostAuthor(AuthorCreateDto author)
         {
             if (_context.Authors == null)
@@ -134,6 +136,7 @@ namespace BookStoreApp.API.Controllers
 
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
             if (_context.Authors == null)
