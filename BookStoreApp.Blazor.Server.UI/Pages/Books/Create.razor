@@ -114,6 +114,8 @@
     private BookCreateDto Book = new BookCreateDto();
     private Response<int> response = new Response<int> { Success = true };
 
+    private long maxFileSize = 1024 * 1024 * 5;
+
     private string img = string.Empty;
     private string Message = string.Empty;
     private string uploadingFileWarning = string.Empty;
@@ -144,6 +146,11 @@
 
         if (file != null)
         {
+            if (file.Size > maxFileSize)
+            {
+                uploadingFileWarning = "Please select valid image file (*.jpg | *.png | *.jpeg)";
+            }
+
             var ext = System.IO.Path.GetExtension(file.Name);
 
             if (".jpg, .png, .jpeg".Contains(ext))
@@ -160,7 +167,7 @@
             }
             else
             {
-                uploadingFileWarning = "Please select valid image file (*.jpg | *.png | *.jpeg";
+                uploadingFileWarning = "Please select valid image file (*.jpg | *.png | *.jpeg)";
             }
         }
     }
