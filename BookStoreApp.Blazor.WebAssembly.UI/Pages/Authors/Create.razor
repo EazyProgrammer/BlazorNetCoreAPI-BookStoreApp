@@ -1,0 +1,81 @@
+﻿@page "/authors/create"
+@inject IAuthorService authorService
+@inject NavigationManager navManager
+@attribute [Authorize(Roles = Roles.Administrator)]
+
+<h3>Create Author</h3>
+
+<hr />
+
+@if (response.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to get data.
+        </h4>
+    </div>
+
+    <hr />
+}
+
+<div class="card-body">
+    <EditForm Model="Author" OnValidSubmit="HandleCreateAuthor">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="email">First Name</label>
+            <InputText class="form-control" @bind-Value="Author.FirstName" id="FirstName" />
+            <ValidationMessage For="@(() => Author.FirstName)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="email">First Name</label>
+            <InputText class="form-control" @bind-Value="Author.LastName" id="LastName" />
+            <ValidationMessage For="@(() => Author.LastName)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="email">First Name</label>
+            <InputTextArea class="form-control" @bind-Value="Author.Bio" id="Bio" />
+            <ValidationMessage For="@(() => Author.Bio)" />
+        </div>
+
+        <br />
+
+        <button @onclick="BackToList" class="btn btn-outline-primary btn-block">
+            <span class="oi oi-arrow-left"></span>
+            Back
+        </button>
+        |
+        <button type="submit" class="btn btn-outline-secondary btn-block">
+            <span class="oi oi-check"></span>
+            Create Author
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    private AuthorCreateDto Author = new AuthorCreateDto();
+    private string Message = string.Empty;
+    private Response<int> response = new Response<int> { Success = true };
+
+    private async Task HandleCreateAuthor()
+    {
+        response = await authorService.CreateAuthor(Author);
+
+        if (response.Success)
+        {
+            BackToList();
+        }
+    }
+
+    private void BackToList()
+    {
+        navManager.NavigateTo("/authors");
+    }
+}

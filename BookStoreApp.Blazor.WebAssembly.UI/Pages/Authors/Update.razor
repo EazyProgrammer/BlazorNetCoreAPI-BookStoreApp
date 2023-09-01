@@ -1,0 +1,115 @@
+﻿@page "/authors/update/{id:int}"
+@inject IAuthorService authorService
+@inject NavigationManager navManager
+@attribute [Authorize(Roles = Roles.Administrator)]
+
+<h3>Update Author Details</h3>
+<hr />
+
+@if (responseGetAuthor.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to get data.
+        </h4>
+    </div>
+
+    <hr />
+}
+
+@if (responseUpdateAuthor.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to update author.
+        </h4>
+    </div>
+
+    <hr />
+}
+
+@if (Author == null)
+{
+    <div class="alert alert-info">
+        <h4>
+            Please wait, loading..
+        </h4>
+    </div>
+}
+else
+{
+    <div class="card-body">
+        <EditForm Model="Author" OnValidSubmit="HandleUpdateAuthor">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <label for="email">First Name</label>
+                <InputText class="form-control" @bind-Value="Author.FirstName" id="FirstName" />
+                <ValidationMessage For="@(() => Author.FirstName)" />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <label for="email">First Name</label>
+                <InputText class="form-control" @bind-Value="Author.LastName" id="LastName" />
+                <ValidationMessage For="@(() => Author.LastName)" />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <label for="email">First Name</label>
+                <InputTextArea class="form-control" @bind-Value="Author.Bio" id="Bio" />
+                <ValidationMessage For="@(() => Author.Bio)" />
+            </div>
+
+            <br />
+
+            <button @onclick="BackToList" class="btn btn-outline-secondary btn-block">
+                <span class="oi oi-arrow-left"></span>
+                Back
+            </button>
+            |
+            <button type="submit" class="btn btn-outline-primary btn-block">
+                <span class="oi oi-pencil"></span>
+                Update Author
+            </button>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private AuthorUpdateDto Author = new AuthorUpdateDto();
+    private Response<AuthorUpdateDto> responseGetAuthor = new Response<AuthorUpdateDto> { Success = true };
+    private Response<int> responseUpdateAuthor = new Response<int> { Success = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        responseGetAuthor = await authorService.GetAuthorForUpdateAsync(id);
+
+        if (responseGetAuthor.Success)
+        {
+            Author = responseGetAuthor.Data ?? new AuthorUpdateDto();
+        }
+    }
+
+    private async Task HandleUpdateAuthor()
+    {
+        responseUpdateAuthor = await authorService.EditAuthor(Author);
+
+        if (responseUpdateAuthor.Success)
+        {
+            BackToList();
+        }
+    }
+
+    private void BackToList()
+    {
+        navManager.NavigateTo("/authors");
+    }
+}

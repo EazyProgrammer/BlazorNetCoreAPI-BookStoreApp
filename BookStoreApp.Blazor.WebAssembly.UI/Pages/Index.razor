@@ -1,0 +1,27 @@
+﻿@page "/"
+
+<AuthorizeView>
+    <NotAuthorized>
+        @if (context.User?.Identity?.IsAuthenticated == false)
+        {
+            <RedirectToLogin />
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                <p>You are not authorized to access this resource.</p>
+            </div>
+        }
+    </NotAuthorized>
+    <Authorized>
+
+        <PageTitle>Index</PageTitle>
+
+        <h1>Hello, world!</h1>
+
+        Welcome to your new app.
+
+        <SurveyPrompt Title="How is Blazor working for you?" />
+
+    </Authorized>
+</AuthorizeView>

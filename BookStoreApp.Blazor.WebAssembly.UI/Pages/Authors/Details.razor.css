@@ -1,0 +1,14 @@
+﻿.book-card {
+    margin-left: 2%;
+    margin-bottom: 2%;
+    width: 31%;
+}
+
+.action-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn-action {
+    width: 30%;
+}

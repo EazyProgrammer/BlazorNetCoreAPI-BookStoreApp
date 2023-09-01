@@ -1,0 +1,67 @@
+﻿@page "/users/login"
+
+@inject IAuthenticationService authenticationService
+
+@inject NavigationManager navManager
+
+<h3>User Login</h3>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-danger">
+        <p>@message</p>
+    </div>
+}
+
+<div class="card-body">
+    <EditForm Model="LoginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <InputText class="form-control" @bind-Value="LoginModel.Email" />
+            <ValidationMessage For="@(() => LoginModel.Email)" />
+        </div>
+
+        <br />
+
+        <div class="form-group">
+            <label for="email">Password</label>
+            <InputText class="form-control" type="password" @bind-Value="LoginModel.PasswordHash" />
+            <ValidationMessage For="@(() => LoginModel.PasswordHash)" />
+        </div>
+
+        <br />
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+    </EditForm>
+</div>
+
+@code {
+    UserLoginDto LoginModel = new UserLoginDto();
+    string message = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var result = await authenticationService.AuthenticateAsync(LoginModel);
+
+            if (result == false)
+            {
+                message = "Username / password is invalid. Please try again.";
+                return;
+            }
+
+            navManager.NavigateTo("/");
+        }
+        catch (ApiException ex)
+        {
+            message = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+        }
+    }
+}

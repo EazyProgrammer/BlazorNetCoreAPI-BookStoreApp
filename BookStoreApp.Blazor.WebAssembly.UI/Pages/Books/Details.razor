@@ -1,0 +1,122 @@
+﻿@page "/books/details/{id:int}"
+@inject IBookService bookService
+@inject NavigationManager navManager
+@attribute [Authorize(Roles = Roles.Administrator)]
+
+<h3>Book Details</h3>
+
+<hr />
+
+@if (response.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to get data.
+        </h4>
+    </div>
+
+    <hr />
+}
+
+<div class="card-body">
+    <EditForm Model="Book">
+        <div class="form-group">
+            <label for="Title">Author Name</label>
+            <InputText class="form-control" @bind-Value="Book.AuthorName" id="AuthorName" disabled />
+            <ValidationMessage For="@(() => Book.AuthorName)" />
+        </div>
+        <br />
+
+        <fieldset disabled>
+
+
+            <div class="form-group">
+                <label for="Title">Title</label>
+                <InputText class="form-control" @bind-Value="Book.Title" id="Title" />
+                <ValidationMessage For="@(() => Book.Title)" />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <label for="Isbn">ISBN</label>
+                <InputText class="form-control" @bind-Value="Book.Isbn" id="Isbn" />
+                <ValidationMessage For="@(() => Book.Isbn)" />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <label for="Year">Year</label>
+                <InputNumber class="form-control" @bind-Value="Book.Year" id="Year" />
+                <ValidationMessage For="@(() => Book.Year)" />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <label for="Price">Price</label>
+                <InputNumber class="form-control" @bind-Value="Book.Price" id="Price" />
+                <ValidationMessage For="@(() => Book.Price)" />
+            </div>
+
+            <br />
+
+            <div class="form-group">
+                <label for="Summary">Summary</label>
+                <InputTextArea class="form-control" @bind-Value="Book.Summary" id="Summary" />
+                <ValidationMessage For="@(() => Book.Summary)" />
+            </div>
+
+            <hr />
+            <div class="form-group">
+                <label><h5>Cover Image</h5></label>
+                <br />
+                <div>
+                    <img src="@Book.Image" width="200" height="200" class="img-thumbnail" id="imgp" />
+                    <br />
+                </div>
+            </div>
+            <hr />
+
+        </fieldset>
+
+        <button class="btn btn-outline-primary btn-block" @onclick="BackToList">
+            <span class="oi oi-arrow-left"></span>
+            Back To List
+        </button>
+        |
+        <button class="btn btn-outline-secondary btn-block" @onclick="EditBook">
+            <span class="oi oi-check"></span>
+            Update Book
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private BookReadOnlyDto Book = new BookReadOnlyDto();
+    private Response<BookReadOnlyDto> response = new Response<BookReadOnlyDto> { Success = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await bookService.GetBookAsync(id);
+
+        if (response.Success)
+        {
+            Book = response.Data ?? new BookReadOnlyDto();
+        }
+    }
+
+    private void BackToList()
+    {
+        navManager.NavigateTo("/books");
+    }
+
+    private void EditBook()
+    {
+        navManager.NavigateTo($"/authors/update/{id}");
+    }
+}

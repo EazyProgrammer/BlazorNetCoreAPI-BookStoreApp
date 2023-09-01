@@ -1,0 +1,138 @@
+﻿@page "/authors/details/{id:int}"
+@inject IAuthorService authorService
+@inject NavigationManager navManager
+
+<h3>Author Details</h3>
+
+<hr />
+
+@if (response.Success == false)
+{
+    <div class="alert alert-info">
+        <h4>
+            Something went wrong trying to get author details.
+        </h4>
+    </div>
+
+    <hr />
+}
+
+@if (Author == null)
+{
+    <div class="alert alert-info">
+        <h4>
+            Please wait, loading author details ..
+        </h4>
+    </div>
+}
+else
+{
+    <div class="card-body">
+        <EditForm Model="Author">
+            <fieldset disabled>
+                <div class="form-group">
+                    <label for="email">First Name</label>
+                    <InputText class="form-control" @bind-Value="Author.FirstName" id="FirstName" />
+                    <ValidationMessage For="@(() => Author.FirstName)" />
+                </div>
+
+                <br />
+
+                <div class="form-group">
+                    <label for="email">First Name</label>
+                    <InputText class="form-control" @bind-Value="Author.LastName" id="LastName" />
+                    <ValidationMessage For="@(() => Author.LastName)" />
+                </div>
+
+                <br />
+
+                <div class="form-group">
+                    <label for="email">First Name</label>
+                    <InputTextArea class="form-control" @bind-Value="Author.Bio" id="Bio" />
+                    <ValidationMessage For="@(() => Author.Bio)" />
+                </div>
+
+            </fieldset>
+
+            <hr>
+
+            @if (Author.Books != null)
+            {
+                <div class="row col-12">
+                    @foreach (var book in Author.Books)
+                    {
+                        <div class="card book-card col-3">
+                            <img src="@book.Image" class="card-img-top" alt="@book.Title">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href="/books/details/@book.Id">@book.Title</a>
+                                </h5>
+                                <hr />
+                                <h7 class="card-title"><b>ISBN - @book.Isbn</b></h7>
+                                <br />
+                                <h7 class="card-title">Year - @book.Year</h7>
+                                <br />
+                                <h7 class="card-title"><b>R @book.Price</b></h7>
+                                <hr />
+                                <p class="card-text">@book.Summary</p>
+                                <hr />
+                                <div class="row col-12 action-row">
+                                    <a class="btn btn-outline-info btn-action col-4" href="/book/details/@book.Id" data-bs-toggle="tooltip" data-bs-html="true" title="Click to view book"><span class="oi oi-book" aria-hidden="true"></span> </a>
+                                    <a class="btn btn-outline-warning btn-action col-4" href="/book/update/@book.Id" data-bs-toggle="tooltip" data-bs-html="true" title="Click to update book"><span class="oi oi-pencil" aria-hidden="true"></span></a>
+                                    <a class="btn btn-outline-danger btn-action col-4" href="/book/create" data-bs-toggle="tooltip" data-bs-html="true" title="Click to remove book"><span class="oi oi-trash" aria-hidden="true"></span></a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <h4>Author has no books.</h4>
+                </div>
+            }
+
+            <br />
+
+            <button @onclick="BackToList" class="btn btn-outline-secondary btn-block">
+                <span class="oi oi-arrow-left"></span>
+                Back To List
+            </button>
+            |
+            <button class="btn btn-outline-primary btn-block" onclick="@EditAuthor">
+                <span class="oi oi-pencil"></span>
+                Edit Author
+            </button>
+
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private AuthorBooksDto Author = new AuthorBooksDto();
+    private Response<AuthorBooksDto> response = new Response<AuthorBooksDto> { Success = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await authorService.GetAuthorAsync(id);
+
+        if (response.Success)
+        {
+            Author = response.Data ?? new AuthorBooksDto();
+        }
+    }
+
+    private void BackToList()
+    {
+        navManager.NavigateTo("/authors");
+    }
+
+    private void EditAuthor()
+    {
+        navManager.NavigateTo($"/authors/update/{id}");
+    }
+}
