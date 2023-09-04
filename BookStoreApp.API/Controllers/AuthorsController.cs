@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BookStoreApp.API.Data;
-using BookStoreApp.API.Models.Author;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using BookStoreApp.BusinessLogic.Models.Authors;
+using BookStoreApp.BusinessLogic.Authors;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -12,15 +11,13 @@ namespace BookStoreApp.API.Controllers
     [Authorize]
     public class AuthorsController : ControllerBase
     {
-        private readonly BookStoreDBContext _context;
+        private readonly IAuthorBusinessLogic _logic;
         private readonly ILogger<BooksController> _logger;
-        private readonly IMapper _mapper;
 
-        public AuthorsController(BookStoreDBContext context, ILogger<BooksController> logger, IMapper mapper)
+        public AuthorsController(IAuthorBusinessLogic logic, ILogger<BooksController> logger)
         {
-            _context = context;
+            _logic = logic;
             _logger = logger;
-            _mapper = mapper;
         }
 
         // GET: api/Authors
@@ -28,14 +25,14 @@ namespace BookStoreApp.API.Controllers
         [Route("GetAllActiveAuthors")]
         public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAllActiveAuthors()
         {
-            if (_context.Authors == null)
+            var authors = await _logic.GetAllActiveAuthors();
+
+            if (authors == null)
             {
                 return NotFound();
             }
-            var author = await _context.Authors
-                .Where(a => a.IsDeleted == false).ToListAsync();
-            var authorDto = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(author);
-            return Ok(authorDto);
+
+            return Ok(authors);
         }
 
         // GET: api/Authors
@@ -43,14 +40,14 @@ namespace BookStoreApp.API.Controllers
         [Route("GetAllInActiveAuthors")]
         public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAllInActiveAuthors()
         {
-            if (_context.Authors == null)
+            var authors = await _logic.GetAllInActiveAuthors();
+
+            if (authors == null)
             {
                 return NotFound();
             }
-            var author = await _context.Authors
-                .Where(a => a.IsDeleted == true).ToListAsync();
-            var authorDto = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(author);
-            return Ok(authorDto);
+
+            return Ok(authors);
         }
 
         // GET: api/Authors/5
@@ -59,24 +56,19 @@ namespace BookStoreApp.API.Controllers
         {
             try
             {
-                if (_context.Authors == null)
+                if (id == 0)
                 {
-                    return NotFound();
+                    return BadRequest();
                 }
 
-                var author = await _context.Authors
-                    .Include(b => b.Books)
-                    .Where(a => a.Id == id)
-                    .FirstOrDefaultAsync();
+                var author = await _logic.GetAuthorById(id);
 
                 if (author == null)
                 {
                     return NotFound();
                 }
 
-                var authorDto = _mapper.Map<AuthorBooksDto>(author);
-
-                return authorDto;
+                return author;
             }
             catch (Exception ex)
             {
@@ -91,27 +83,21 @@ namespace BookStoreApp.API.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> PutAuthor(AuthorUpdateDto author)
         {
-            var auth = _mapper.Map<Author>(author);
-            _context.Entry(auth).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AuthorExists(auth.Id))
+                if (author == null)
                 {
-                    _logger.LogError("Author not found!", auth.Id);
-                    return NotFound();
+                    return BadRequest();
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                await _logic.UpdateAuthor(author);
+                return Ok();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Something went wrong trying to update Author, please try again!");
+                return NotFound();
+            }
         }
 
         // POST: api/Authors
@@ -121,17 +107,23 @@ namespace BookStoreApp.API.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<ActionResult> PostAuthor(AuthorCreateDto author)
         {
-            if (_context.Authors == null)
+            try
             {
-                _logger.LogWarning("Entity set 'BookStoreDBContext.Authors'  is null.!");
-                return Problem("Entity set 'BookStoreDBContext.Authors'  is null.");
+                if (author == null)
+                {
+                    _logger.LogWarning("Author details are required and cannot be null / empty!");
+                    return Problem("Author details are required and cannot be null / empty!");
+                }
+
+                var a = await _logic.AddAuthor(author);
+
+                return Ok(author);
             }
-
-            var auth = _mapper.Map<Author>(author);
-            _context.Authors.Add(auth);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetAuthor", new { id = auth.Id }, author);
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Something went wrong trying to update Author, please try again!");
+                return NotFound();
+            }
         }
 
         // DELETE: api/Authors/5
@@ -139,28 +131,14 @@ namespace BookStoreApp.API.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
-            if (_context.Authors == null)
+            if (id == 0)
             {
                 return NotFound();
             }
-            var author = await _context.Authors.FindAsync(id);
-            if (author == null)
-            {
-                _logger.LogError("Author not found!", id);
-                return NotFound();
-            }
 
-            author.IsDeleted = true;
-
-            _context.Entry(author).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            await _logic.DeActivateAuthor(id);
 
             return NoContent();
-        }
-
-        private bool AuthorExists(int id)
-        {
-            return (_context.Authors?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

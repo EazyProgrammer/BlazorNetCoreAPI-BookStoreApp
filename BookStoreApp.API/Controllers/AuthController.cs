@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-using BookStoreApp.API.Data;
-using BookStoreApp.API.Helpers;
-using BookStoreApp.API.Models.User;
+using BookStoreApp.BusinessLogic.Authorization;
+using BookStoreApp.BusinessLogic.Models.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,18 +12,12 @@ namespace BookStoreApp.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
-        private readonly IMapper _mapper;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfiguration _configuration;
-        private JwtTokenHelper _jwtTokenHelper;
+        private readonly IAuthorizationBusinessLogic _logic;
 
-        public AuthController(ILogger<AuthController> logger, IMapper mapper, UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public AuthController(ILogger<AuthController> logger, IAuthorizationBusinessLogic logic)
         {
             _logger = logger;
-            _mapper = mapper;
-            _userManager = userManager;
-            _configuration = configuration;
-            _jwtTokenHelper = new JwtTokenHelper(configuration);
+            _logic = logic;
         }
 
         [HttpPost]
@@ -36,49 +29,12 @@ namespace BookStoreApp.API.Controllers
             {
                 if (userDto == null)
                 {
-                    _logger.LogError("User detials are required and cannot be null", userDto);
-                    return BadRequest("User detials are required and cannot be null");
+                    _logger.LogError("User details are required and cannot be null", userDto);
+                    return BadRequest("User details are required and cannot be null");
                 }
 
-                var user = _mapper.Map<ApplicationUser>(userDto);
-                user.UserName = userDto.Email.ToLower();
-                user.NormalizedUserName = userDto.Email.ToUpper();
-
-                var result = await _userManager.CreateAsync(user, user.PasswordHash);
-
-                if (result.Succeeded == false)
-                {
-                    foreach (var err in result.Errors)
-                    {
-                        ModelState.AddModelError(err.Code, err.Description);
-                    }
-
-                    _logger.LogError("Error occured trying to add user to database", ModelState);
-                    return BadRequest(ModelState);
-                }
-
-                if (!string.IsNullOrEmpty(userDto.Role))
-                {
-                    result = await _userManager.AddToRoleAsync(user, userDto.Role);
-                }
-
-                if (result.Succeeded == false)
-                {
-                    foreach (var err in result.Errors)
-                    {
-                        ModelState.AddModelError(err.Code, err.Description);
-                    }
-
-                    _logger.LogError("Error occured trying to assign user to role", ModelState);
-                    return BadRequest(ModelState);
-                }
-
-                var usr = _mapper.Map<ApplicationUserDetailsDto>(user);
-
-                var role = await _userManager.GetRolesAsync(user);
-                usr.Role = role.FirstOrDefault() ?? "INVALID";
-
-                return Ok(usr);
+                var user = await _logic.RegisterUser(userDto);
+                return Ok(user);
             }
             catch (Exception ex)
             {
@@ -94,31 +50,15 @@ namespace BookStoreApp.API.Controllers
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(loginDto.Email);
-
-                if (user == null)
+                if (loginDto == null)
                 {
-                    _logger.LogError("User cannot be found in the database!", loginDto);
+                    _logger.LogError("User login details are required and cannot be null / empty!", loginDto);
                     return Unauthorized(loginDto);
                 }
 
-                var passValid = await _userManager.CheckPasswordAsync(user, loginDto.PasswordHash);
+                var result = await _logic.LoginUser(loginDto);
 
-                if (passValid == false)
-                {
-                    _logger.LogError("User cannot be found in the database!", loginDto);
-                    return Unauthorized(loginDto);
-                }
-
-                var usr = _mapper.Map<ApplicationUserDetailsDto>(user);
-                var roles = await _userManager.GetRolesAsync(user);
-                usr.Role = roles.FirstOrDefault() ?? "INVALID";
-
-                var userClaims = await _userManager.GetClaimsAsync(user);
-
-                var token = _jwtTokenHelper.GenerateWebToken(user, roles, userClaims);
-
-                return Ok(new UserLoginRespone { UserDetails = usr, Token = token });
+                return Ok(new UserLoginRespone { UserDetails = result.Item1, Token = result.Item2 });
             }
             catch (Exception ex)
             {

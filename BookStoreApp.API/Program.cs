@@ -1,26 +1,17 @@
-using BookStoreApp.API.Configurations;
-using BookStoreApp.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+//Bootstrap application services and configurations 
 var connString = builder.Configuration.GetConnectionString("BookStoreAppDbConnection");
-builder.Services.AddDbContext<BookStoreDBContext>(options => options.UseSqlServer(connString));
+builder.Services.AddBookStoreConfigurations(connString);
+builder.Services.AddBookStoreServices();
 
-builder.Services
-    .AddIdentityCore<ApplicationUser>()
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<BookStoreDBContext>();
-
-builder.Services.AddAutoMapper(typeof(MapperConfig));
-
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
