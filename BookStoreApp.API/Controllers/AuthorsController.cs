@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using BookStoreApp.BusinessLogic.Models.Authors;
 using BookStoreApp.BusinessLogic.Authors;
+using BookStoreApp.BusinessLogic.Models;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -20,10 +21,25 @@ namespace BookStoreApp.API.Controllers
             _logger = logger;
         }
 
-        // GET: api/Authors
+        // GET: api/Authors/?startIndex=0&pageSize=15
+        [HttpGet]
+        [Route("GetAllActiveAuthorsByParameter")]
+        public async Task<ActionResult<VirtualizeResponse<AuthorReadOnlyDto>>> GetAllActiveAuthorsByParameter([FromQuery] QueryParameters parameters)
+        {
+            var authors = await _logic.GetAllActiveAuthorsByParameter<AuthorReadOnlyDto>(parameters);
+
+            if (authors == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(authors);
+        }
+
+        // GET: api/Authors/?startIndex=0&pageSize=15
         [HttpGet]
         [Route("GetAllActiveAuthors")]
-        public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAllActiveAuthors()
+        public async Task<ActionResult<List<AuthorReadOnlyDto>>> GetAllActiveAuthors()
         {
             var authors = await _logic.GetAllActiveAuthors();
 

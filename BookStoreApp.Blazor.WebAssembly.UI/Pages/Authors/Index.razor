@@ -26,72 +26,24 @@
 }
 else
 {
-
     <AuthorizeView Roles="Administrator">
         <a class="btn btn-outline-success" href="/authors/create"><span class="oi oi-plus" aria-hidden="true"></span> Create</a>
         <br />
         <br />
     </AuthorizeView>
-    <table class="table table-responsive">
-        <thead>
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <AuthorizeView Roles="Administrator">
-                    <th>Actions</th>
-                </AuthorizeView>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var author in Model)
-            {
-                <tr>
-                    <td>@author.FirstName</td>
-                    <td>@author.LastName</td>
-                    <td>
-                        <AuthorizeView Roles="Administrator">
-                            <a class="btn btn-outline-info" href="/authors/details/@author.Id"><span class="oi oi-book" aria-hidden="true"></span> </a>
-                            <a class="btn btn-outline-warning" href="/authors/update/@author.Id"><span class="oi oi-pencil" aria-hidden="true"></span></a>
-                            <a class="btn btn-outline-danger" @onclick=@(() => DeleteAuthor(author.Id))><span class="oi oi-trash" aria-hidden="true"></span></a>
-                        </AuthorizeView>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+ 
+    <AuthorTable Authors="Model" TotalSize="TotalSize" OnScroll="LoadAuthors" />
 }
 
 @code {
-    private List<AuthorReadOnlyDto> Model;
+    public int TotalSize{ get; set; }
+    public List<AuthorReadOnlyDto> Model = new List<AuthorReadOnlyDto>();
     private Response<List<AuthorReadOnlyDto>> response = new Response<List<AuthorReadOnlyDto>> { Success = true };
 
-    protected override async Task OnInitializedAsync()
+    private async Task LoadAuthors(QueryParameters parameters)
     {
-        response = await authorService.GetActiveAuthorListAsync();
-
-        if (response.Success)
-        {
-            Model = response.Data;
-        }
-        else
-        {
-            Model = new List<AuthorReadOnlyDto>();
-        }
-    }
-
-    private async Task DeleteAuthor(int authorId)
-    {
-        var author = Model.First(q => q.Id == authorId);
-        var confirm = await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {author.FirstName} {author.LastName} ?");
-
-        if (confirm)
-        {
-            var response = await authorService.DeleteAuthor(authorId);
-
-            if (response.Success)
-            {
-                await OnInitializedAsync();
-            }
-        }
+        var virtualizedResult = await authorService.GetActiveAuthorListByParameterAsync(parameters);
+        Model = virtualizedResult.Data != null ? virtualizedResult.Data.Items.ToList() : new List<AuthorReadOnlyDto>();
+        TotalSize = virtualizedResult.Data != null ? virtualizedResult.Data.TotalSize : 0;
     }
 }

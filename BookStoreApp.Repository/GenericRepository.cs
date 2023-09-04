@@ -11,6 +11,8 @@ namespace BookStoreApp.Repository
             _context = context;
         }
 
+        public async Task<int> GetRecordsCountAsyc() => await _context.Set<T>().CountAsync();
+
         public async Task<List<T>> GetAllAsync()
         {
             return await _context.Set<T>().ToListAsync();

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Blazored.LocalStorage;
+using BookStoreApp.Blazor.WebAssembly.UI.Models;
 using BookStoreApp.Blazor.WebAssembly.UI.Services.Base;
 
 namespace BookStoreApp.Blazor.WebAssembly.UI.Services
@@ -16,6 +17,28 @@ namespace BookStoreApp.Blazor.WebAssembly.UI.Services
             _client = client;
             _localStorageService = localStorageService;
             _mapper = mapper;
+        }
+
+        public async Task<Response<AuthorReadOnlyDtoVirtualizeResponse>> GetActiveAuthorListByParameterAsync(QueryParameters parameters)
+        {
+            Response<AuthorReadOnlyDtoVirtualizeResponse>? response;
+
+            try
+            {
+                await GetBearerTojken();
+                var data = await _client.GetAllActiveAuthorsByParameterAsync(parameters.StartIndex, parameters.PageSize);
+                response = new Response<AuthorReadOnlyDtoVirtualizeResponse>
+                {
+                    Data = data,
+                    Success = true
+                };
+            }
+            catch (ApiException ex)
+            {
+                response = ConvertApiExceptions<AuthorReadOnlyDtoVirtualizeResponse>(ex);
+            }
+
+            return response;
         }
 
         public async Task<Response<List<AuthorReadOnlyDto>>> GetActiveAuthorListAsync()

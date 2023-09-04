@@ -1,10 +1,12 @@
-﻿using BookStoreApp.Blazor.WebAssembly.UI.Services.Base;
+﻿using BookStoreApp.Blazor.WebAssembly.UI.Models;
+using BookStoreApp.Blazor.WebAssembly.UI.Services.Base;
 
 namespace BookStoreApp.Blazor.WebAssembly.UI.Services
 {
     public interface IAuthorService
     {
         //get
+        Task<Response<AuthorReadOnlyDtoVirtualizeResponse>> GetActiveAuthorListByParameterAsync(QueryParameters parameters);
         Task<Response<List<AuthorReadOnlyDto>>> GetActiveAuthorListAsync();
         Task<Response<AuthorBooksDto>> GetAuthorAsync(int id);
         Task<Response<AuthorUpdateDto>> GetAuthorForUpdateAsync(int id);

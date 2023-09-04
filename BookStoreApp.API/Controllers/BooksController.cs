@@ -34,7 +34,7 @@ namespace BookStoreApp.API.Controllers
 
         // GET: api/Books/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BookDetailsDto>> GetBook(int id)
+        public async Task<ActionResult<BookReadOnlyDto>> GetBook(int id)
         {
             if (id == 0)
             {

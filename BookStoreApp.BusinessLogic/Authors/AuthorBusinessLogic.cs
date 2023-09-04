@@ -16,14 +16,37 @@ namespace BookStoreApp.BusinessLogic.Models.Authors
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<AuthorReadOnlyDto>> GetAllActiveAuthors()
+        public async Task<VirtualizeResponse<TResult>> GetAllActiveAuthorsByParameter<TResult>(QueryParameters queryParameters)
+            where TResult : class
         {
+            var totalSize = await _repository.GetRecordsCountAsyc();
+
             var authors = await _repository.GetAllAsync();
 
             //Business logic to return only active authors
-            authors = authors.Where(a => a.IsDeleted == false).ToList();
+            authors = authors
+                .Skip(queryParameters.StartIndex)
+                .Take(queryParameters.PageSize)
+                .Where(a => a.IsDeleted == false)
+                .ToList();
 
-            var authorsDto = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(authors);
+            var authorsDto = _mapper.Map<List<TResult>>(authors);
+
+            return new VirtualizeResponse<TResult> { Items = authorsDto, TotalSize = totalSize };
+        }
+
+        public async Task<List<AuthorReadOnlyDto>> GetAllActiveAuthors()
+        {
+            var totalSize = await _repository.GetRecordsCountAsyc();
+
+            var authors = await _repository.GetAllAsync();
+
+            //Business logic to return only active authors
+            authors = authors
+                .Where(a => a.IsDeleted == false)
+                .ToList();
+
+            var authorsDto = _mapper.Map<List<AuthorReadOnlyDto>>(authors);
 
             return authorsDto;
         }

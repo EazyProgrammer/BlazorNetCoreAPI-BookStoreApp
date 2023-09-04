@@ -5,7 +5,7 @@ namespace BookStoreApp.BusinessLogic.Models.Books
     {
         Task<IEnumerable<BookReadOnlyDto>> GetAllActiveBooks();
         Task<IEnumerable<BookReadOnlyDto>> GetAllInActiveBooks();
-        Task<BookDetailsDto> GetBookById(int id);
+        Task<BookReadOnlyDto> GetBookById(int id);
 
         Task UpdateBook(BookUpdateDto book, string rootPath, string url);
 
