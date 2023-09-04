@@ -45,7 +45,7 @@ namespace BookStoreApp.BusinessLogic.Models.Books
         public async Task<BookDetailsDto> GetBookById(int id)
         {
             var Books = await _repository.GetBookAsync(id);
-            var BooksDto = _mapper.Map<BookDetailsDto>(Books);
+            var BooksDto = _mapper.Map<BookReadOnlyDto>(Books);
             return BooksDto;
         }
 

@@ -20,6 +20,7 @@ namespace BookStoreApp.BusinessLogic.Configurations
             CreateMap<AuthorUpdateDto, Author>().ReverseMap();
 
             CreateMap<BookCreateDto, Book>().ReverseMap();
+            CreateMap<BookDetailsDto, Book>().ReverseMap();
             CreateMap<BookUpdateDto, Book>().ReverseMap();
 
             CreateMap<BookReadOnlyDto, Book>();

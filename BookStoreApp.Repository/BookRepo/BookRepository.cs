@@ -13,11 +13,12 @@ namespace BookStoreApp.Repository.BookRepo
 
         public async Task<Book> GetBookAsync(int id)
         {
-            var author = await _context.Books
+            var book = await _context.Books
+                .Include(x => x.Author)
                 .Where(a => a.Id == id)
                 .FirstOrDefaultAsync();
 
-            return author ?? new Book();
+            return book ?? new Book();
         }
     }
 }

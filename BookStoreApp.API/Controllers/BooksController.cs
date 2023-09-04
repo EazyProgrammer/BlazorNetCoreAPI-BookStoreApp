@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using BookStoreApp.BusinessLogic.Models.Books;
+using BookStoreApp.Repository;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -40,15 +41,23 @@ namespace BookStoreApp.API.Controllers
                 return NotFound();
             }
 
-            var book = await _logic.GetBookById(id);
-
-            if (book == null)
+            try
             {
-                _logger.LogWarning("Book not found!", id);
-                return NotFound();
-            }
+                var book = await _logic.GetBookById(id);
 
-            return book;
+                if (book == null)
+                {
+                    _logger.LogWarning("Book not found!", id);
+                    return NotFound();
+                }
+
+                return book;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error occurred trying to get Book!", ex);
+                return StatusCode(500, id);
+            }
         }
 
         // PUT: api/Books/5
