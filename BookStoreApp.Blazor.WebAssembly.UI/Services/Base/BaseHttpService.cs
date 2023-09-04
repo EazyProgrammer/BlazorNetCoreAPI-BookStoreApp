@@ -27,6 +27,16 @@ namespace BookStoreApp.Blazor.WebAssembly.UI.Services.Base
                 };
             }
 
+            if (exception.StatusCode == 401)
+            {
+                return new Response<Guid>()
+                {
+                    Message = "Invalid username / password.",
+                    ValidationErrors = exception.Response,
+                    Success = false
+                };
+            }
+
             if (exception.StatusCode == 404)
             {
                 return new Response<Guid>()

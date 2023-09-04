@@ -5,30 +5,48 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace BookStoreApp.Blazor.WebAssembly.UI.Services.Authentication
 {
-    public class AuthenticationService : IAuthenticationService
+    public class AuthenticationService : BaseHttpService, IAuthenticationService
     {
         private readonly IClient _httpClient;
         private readonly ILocalStorageService _localStorage;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
 
         public AuthenticationService(IClient httpClient, ILocalStorageService localStorage, AuthenticationStateProvider authenticationStateProvider)
+             : base(httpClient, localStorage)
         {
             _httpClient = httpClient;
             _localStorage = localStorage;
             _authenticationStateProvider = authenticationStateProvider;
         }
 
-        public async Task<bool> AuthenticateAsync(UserLoginDto user)
+        public async Task<Response<UserLoginRespone>> AuthenticateAsync(UserLoginDto user)
         {
-            var response = await _httpClient.LoginAsync(user);
+            var result = new Response<UserLoginRespone>();
 
-            //store token
-            await _localStorage.SetItemAsync("accessToken", response.Token);
+            try
+            {
+                var response = await _httpClient.LoginAsync(user);
 
-            //change auth state of app
-            await ((ApiAuthenticationStateProvider)_authenticationStateProvider).LoggedIn();
+                //store token
+                await _localStorage.SetItemAsync("accessToken", response.Token);
 
-            return true;
+                //change auth state of app
+                await ((ApiAuthenticationStateProvider)_authenticationStateProvider).LoggedIn();
+
+                result = new Response<UserLoginRespone>()
+                {
+                    Data = response,
+                    Success = true
+                };
+
+                return result;
+            }
+            catch (ApiException ex)
+            {
+                result = ConvertApiExceptions<UserLoginRespone>(ex);
+            }
+
+            return result;
         }
 
         public async Task Logout()

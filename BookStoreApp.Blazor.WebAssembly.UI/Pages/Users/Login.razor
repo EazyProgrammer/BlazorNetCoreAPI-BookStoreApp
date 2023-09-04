@@ -47,9 +47,15 @@
         {
             var result = await authenticationService.AuthenticateAsync(LoginModel);
 
-            if (result == false)
+            if (result == null)
             {
                 message = "Username / password is invalid. Please try again.";
+                return;
+            }
+
+            if (result.Success == false)
+            {
+                message = result.Message;
                 return;
             }
 

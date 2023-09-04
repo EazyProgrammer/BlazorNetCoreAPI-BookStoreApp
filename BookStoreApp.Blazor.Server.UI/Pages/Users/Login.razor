@@ -1,9 +1,9 @@
 ﻿@page "/users/login"
-
+@* 
 @inject IAuthenticationService authService
 
 @inject NavigationManager navManager
-
+ *@
 
 <h3>User Login</h3>
 
@@ -38,7 +38,7 @@
     </EditForm>
 </div>
 
-@code {
+@* @code {
     UserLoginDto LoginModel = new UserLoginDto();
     string message = string.Empty;
 
@@ -48,9 +48,15 @@
         {
             var result = await authService.AuthenticateAsync(LoginModel);
 
-            if (result == false)
+            if (result == null)
             {
                 message = "Username / password is invalid. Please try again.";
+                return;
+            }
+
+            if (result.Success == false)
+            {
+                message = result.Message;
                 return;
             }
 
@@ -65,4 +71,4 @@
             message = ex.Message;
         }
     }
-}
+} *@
