@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookStoreApp.MAUI.App.UI.NewPage1"
+             xmlns:reources="clr-namespace:BookStoreApp.MAUI.App.UI.Resources"
+             Title="NewPage1">
+    <VerticalStackLayout>
+        <Label 
+            Text="Count: 0"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            x:Name="lblCounter"
+            FontSize="22"
+            FontAttributes="Bold"
+            TextColor="{x:Static Member=reources:SharedResources.FontColor} "/>
+
+        <Button 
+            Text="Click to count"
+            Clicked="Button_Clicked"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+
+    </VerticalStackLayout>
+</ContentPage>
