@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookStoreApp.Infrastructure
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookStoreApp.MAUI.UI", "BookStoreApp.MAUI.UI\BookStoreApp.MAUI.UI.csproj", "{C84E44B8-52AE-4177-A65B-34951A672192}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookStoreApp.MAUI.App.UI", "BookStoreApp.MAUI.App.UI\BookStoreApp.MAUI.App.UI.csproj", "{57BC9DA4-A757-4194-85F1-2ABDB90C0205}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookStoreApp.MAUI.App.UI", "BookStoreApp.MAUI.App.UI\BookStoreApp.MAUI.App.UI.csproj", "{57BC9DA4-A757-4194-85F1-2ABDB90C0205}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarListingApp.MAUI.UI", "CarListingApp.MAUI.UI\CarListingApp.MAUI.UI.csproj", "{0ACA9E30-C081-488F-988A-8D59C1BD256A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,12 @@ Global
 		{57BC9DA4-A757-4194-85F1-2ABDB90C0205}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57BC9DA4-A757-4194-85F1-2ABDB90C0205}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57BC9DA4-A757-4194-85F1-2ABDB90C0205}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{0ACA9E30-C081-488F-988A-8D59C1BD256A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ACA9E30-C081-488F-988A-8D59C1BD256A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ACA9E30-C081-488F-988A-8D59C1BD256A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0ACA9E30-C081-488F-988A-8D59C1BD256A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ACA9E30-C081-488F-988A-8D59C1BD256A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0ACA9E30-C081-488F-988A-8D59C1BD256A}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
