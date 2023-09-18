@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CarListingApp.MAUI.UI.Services;
+using CarListingApp.MAUI.UI.ViewModels;
+using CarListingApp.MAUI.UI.Views;
+using Microsoft.Extensions.Logging;
 
 namespace CarListingApp.MAUI.UI
 {
@@ -18,6 +21,14 @@ namespace CarListingApp.MAUI.UI
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
+
+            builder.Services.AddSingleton<CarService>();
+
+            builder.Services.AddSingleton<CarListViewModel>();
+            builder.Services.AddSingleton<CarDetailsViewModel>();
+
+            builder.Services.AddSingleton<MainPage>();
+            builder.Services.AddSingleton<CarDetailsPage>();
 
             return builder.Build();
         }
