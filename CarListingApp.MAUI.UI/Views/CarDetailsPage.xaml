@@ -3,14 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CarListingApp.MAUI.UI.Views.CarDetailsPage"
              xmlns:vm="clr-namespace:CarListingApp.MAUI.UI.ViewModels"
-             Title="{Binding Title}"
+             Title="{Binding Car.Make}"
              x:DataType="vm:CarDetailsViewModel">
-    
+
     <StackLayout>
+        <Label 
+            Text=""
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            FontSize="Medium" />
+        <Label 
+            Text="{Binding Car.Make}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            FontSize="Medium" />
+        <Label 
+            Text="{Binding Car.Model}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+            FontSize="Medium" />
         <Label 
             Text="{Binding Car.Vin}"
             VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+            HorizontalOptions="Center"
+            FontSize="Medium" />
     </StackLayout>
     
 </ContentPage>

@@ -7,7 +7,56 @@
              x:DataType="viewModel:CarListViewModel"
              Title="{Binding Title}">
 
-    <Grid ColumnDefinitions="*,*" ColumnSpacing="5" RowDefinitions="*, Auto">
+    <Grid ColumnSpacing="1" RowSpacing="1" Padding="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <VerticalStackLayout Padding="5" Grid.Row="0" Margin="9">
+            <Entry x:Name="Make" Placeholder="Enter Make" Text="{Binding Make}" Margin="10" />
+            <Entry x:Name="Model" Placeholder="Enter Model" Text="{Binding Model}" Margin="10" />
+            <Entry x:Name="Vin" Placeholder="Enter Vin" Text="{Binding Vin}" Margin="10" />
+        </VerticalStackLayout>
+
+        <HorizontalStackLayout Grid.Row="1" Margin="10" Padding="20, 0, 0, 5">
+            <Button Text="Add Car"  Command="{Binding AddCarCommand}" IsEnabled="{Binding IsNotLoading}" IsVisible="{Binding AddMode}" Margin="9" />
+            <Button Text="Update Car" Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:CarListViewModel}}, Path=UpdateCarCommand}" CommandParameter="{Binding CarId}" IsVisible="{Binding EditMode}" Margin="9" />
+            <Button Text="Fetch Cars" Command="{Binding GetCarListCommand}" IsEnabled="{Binding IsNotLoading}" Margin="9" />
+        </HorizontalStackLayout>
+
+        <RefreshView Grid.Row="4" Grid.ColumnSpan="2" Command="{Binding GetCarListCommand}" IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding Cars}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Car">
+                        <Grid Padding="10" ColumnDefinitions="*, auto">
+                            <Frame HeightRequest="70" Grid.Column="0">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:CarListViewModel}}, Path=GetCarDetailsCommand}" CommandParameter="{Binding Id}" />
+                                </Frame.GestureRecognizers>
+                                <HorizontalStackLayout Padding="5" Spacing="5">
+                                    <Label Text="{Binding Make}"></Label>
+                                    <Label Text="{Binding Model}"></Label>
+                                </HorizontalStackLayout>
+                            </Frame>
+                            <HorizontalStackLayout Grid.Column="1">
+                                <Button Text="Edit" Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:CarListViewModel}}, Path=EditCarCommand}" CommandParameter="{Binding Id}" Margin="9" />
+                                <Button Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type viewModel:CarListViewModel}}, Path=DeleteCarCommand}" CommandParameter="{Binding Id}" Margin="9" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+
+    <!--<Grid ColumnDefinitions="*,*" ColumnSpacing="5" RowDefinitions="*, Auto">
         <RefreshView Grid.ColumnSpan="2" Command="{Binding GetCarListCommand}" IsRefreshing="{Binding IsRefreshing}">
             <CollectionView ItemsSource="{Binding Cars}" SelectionMode="None">
                 <CollectionView.ItemTemplate>
@@ -30,7 +79,7 @@
             </CollectionView>
         </RefreshView>
 
-        <Button Text="Fetch Cars" Command="{Binding GetCarListCommand}" IsEnabled="{Binding IsNotLoading}" Grid.Row="1" Grid.Column="0" Margin="6"></Button>
-    </Grid>
+        <Button Text="Fetch Cars" Command="{Binding GetCarListCommand}" IsEnabled="{Binding IsNotLoading}" Grid.Row="1" Margin="15" Grid.ColumnSpan="2"></Button>
+    </Grid>-->
 
 </ContentPage>

@@ -1,16 +1,9 @@
-﻿
-using SQLite;
+﻿namespace CarListingApp.API.Data;
 
-namespace CarListingApp.MAUI.UI.Models;
-
-[Table("Cars")]
-public class Car : BaseEntity
+public class Car
 {
+    public int Id { get; set; }
     public string Make { get; set; } = string.Empty;
-    
     public string Model { get; set; } = string.Empty;
-    
-    [MaxLength(15)]
-    [Unique]
     public string Vin { get; set; } = string.Empty;
 }
